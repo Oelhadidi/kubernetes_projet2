@@ -19,11 +19,13 @@ function Test-Endpoint {
         if ($response.StatusCode -eq $ExpectedStatusCode) {
             Write-Host "✅ $Name : OK (Status: $($response.StatusCode))" -ForegroundColor Green
             return $true
-        } else {
+        }
+        else {
             Write-Host "❌ $Name : ERREUR (Status: $($response.StatusCode))" -ForegroundColor Red
             return $false
         }
-    } catch {
+    }
+    catch {
         Write-Host "❌ $Name : ERREUR ($($_.Exception.Message))" -ForegroundColor Red
         return $false
     }
@@ -45,7 +47,8 @@ function Test-Pods {
         if ($status -ne "Running" -and $status -ne "Completed") {
             Write-Host "❌ Pod $name : $status" -ForegroundColor Red
             $failedPods++
-        } else {
+        }
+        else {
             Write-Host "✅ Pod $name : $status" -ForegroundColor Green
         }
     }
@@ -131,13 +134,15 @@ if (-not (Test-Endpoint "Application OroCommerce" "http://localhost:8080" 200)) 
 }
 
 # Test Prometheus
-if (-not (Test-Endpoint "Prometheus" "http://localhost:9090" 405)) {  # 405 = Method Not Allowed pour HEAD
+if (-not (Test-Endpoint "Prometheus" "http://localhost:9090" 405)) {
+    # 405 = Method Not Allowed pour HEAD
     Write-Host "💡 Pour activer: kubectl port-forward service/prometheus 9090:9090" -ForegroundColor Gray
     $ErrorCount++
 }
 
 # Test Grafana
-if (-not (Test-Endpoint "Grafana" "http://localhost:3000" 302)) {  # 302 = Redirect to login
+if (-not (Test-Endpoint "Grafana" "http://localhost:3000" 302)) {
+    # 302 = Redirect to login
     Write-Host "💡 Pour activer: kubectl port-forward service/grafana 3000:3000" -ForegroundColor Gray
     $ErrorCount++
 }
@@ -151,7 +156,8 @@ if ($ErrorCount -eq 0) {
     Write-Host "✅ Application OroCommerce accessible" -ForegroundColor Green
     Write-Host "✅ Monitoring Prometheus/Grafana fonctionnel" -ForegroundColor Green
     Write-Host "✅ Sécurité avec Secrets configurée" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "⚠️  ATTENTION : $ErrorCount erreur(s) détectée(s)" -ForegroundColor Red
     Write-Host "Vérifiez les messages d'erreur ci-dessus" -ForegroundColor Red
 }
