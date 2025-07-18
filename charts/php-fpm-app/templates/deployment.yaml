@@ -11,6 +11,10 @@ spec:
     metadata:
       labels:
         app: php-fpm-app
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9000"
+        prometheus.io/path: "/metrics"
     spec:
       initContainers:
         - name: init-permissions

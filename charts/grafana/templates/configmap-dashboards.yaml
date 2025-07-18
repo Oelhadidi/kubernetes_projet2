@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  labels:
+    app: grafana
+data:
+  orocommerce-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "OroCommerce Overview",
+        "tags": ["orocommerce"],
+        "style": "dark",
+        "timezone": "browser",
+        "refresh": "5s",
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "panels": [
+          {
+            "id": 1,
+            "title": "CPU Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "rate(container_cpu_usage_seconds_total{pod=~\"nginx.*|php-fpm-app.*|postgresql.*|redis.*|elasticsearch.*\"}[5m]) * 100",
+                "legendFormat": "{{`{{pod}}`}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "percent"
+              }
+            }
+          },
+          {
+            "id": 2,
+            "title": "Memory Usage",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "container_memory_usage_bytes{pod=~\"nginx.*|php-fpm-app.*|postgresql.*|redis.*|elasticsearch.*\"} / 1024 / 1024",
+                "legendFormat": "{{`{{pod}}`}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+            "fieldConfig": {
+              "defaults": {
+                "unit": "decbytes"
+              }
+            }
+          },
+          {
+            "id": 3,
+            "title": "Pod Status",
+            "type": "table",
+            "targets": [
+              {
+                "expr": "kube_pod_status_phase{pod=~\"nginx.*|php-fpm-app.*|postgresql.*|redis.*|elasticsearch.*\"}",
+                "legendFormat": "{{`{{pod}} - {{phase}}`}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8}
+          }
+        ]
+      }
+    }
