@@ -1,12 +1,38 @@
-# Projet EII 5 - Migration OroCommerce vers Kubernetes
+# 🛒 OroCommerce sur Kubernetes avec Données de Démo Complètes
 
-**Migration complète de l'application OroCommerce depuis Docker Compose vers Kubernetes avec Helm Charts**
+**Déploiement complet d'OroCommerce avec 64 produits, interface admin et monitoring intégré.**
 
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.25+-blue.svg)](https://kubernetes.io/)
 [![Helm](https://img.shields.io/badge/Helm-3.x-brightgreen.svg)](https://helm.sh/)
 [![OroCommerce](https://img.shields.io/badge/OroCommerce-6.1.0-orange.svg)](https://oroinc.com/)
 
-## 🎯 Objectif du projet
+## 🚀 Installation en 1 commande
+
+```powershell
+# Cloner et installer
+git clone https://github.com/Oelhadidi/kubernetes_projet.git
+cd kubernetes_projet
+./setup-complete-orocommerce.ps1
+```
+
+## ✨ Ce que vous obtenez
+
+- **🛍️ 64 produits** avec images et descriptions complètes
+- **🏠 Page d'accueil** avec contenu RV professionnel  
+- **👨‍💼 Interface admin** (admin/admin)
+- **🔍 Recherche** et filtres fonctionnels
+- **📊 Monitoring** Prometheus + Grafana
+- **🎨 Design** moderne avec tous les assets
+
+## 🎯 URLs d'accès
+
+Après installation et `kubectl port-forward service/nginx 8080:80` :
+
+- **Boutique :** http://localhost:8080
+- **Admin :** http://localhost:8080/admin
+- **Produits :** http://localhost:8080/product/
+- **Prometheus :** http://localhost:9090 (avec port-forward)
+- **Grafana :** http://localhost:3000 (avec port-forward)
 
 Migrer l'application **OroCommerce Demo** depuis Docker Compose vers Kubernetes en utilisant Helm Charts, avec monitoring intégré et sécurité renforcée.
 
