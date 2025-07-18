@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: oro-copy-assets
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-pvc
+          image: busybox
+          command: ['sh', '-c', 'until [ -d /target/orocommerce ]; do echo "Waiting for PVC..."; sleep 5; done']
+          volumeMounts:
+            - name: oro-app-data
+              mountPath: /target
+      containers:
+        - name: copy-assets
+          image: oroinc/orocommerce-application:6.1.0
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Copying compiled assets from official image..."
+              
+              # Copier tous les assets compilés
+              if [ -d /var/www/oro/public/build ]; then
+                echo "Copying /var/www/oro/public/build -> /target/orocommerce/public/build"
+                cp -rf /var/www/oro/public/build /target/orocommerce/public/
+                chown -R 82:82 /target/orocommerce/public/build
+              fi
+              
+              # Copier les assets JS
+              if [ -d /var/www/oro/public/js ]; then
+                echo "Copying /var/www/oro/public/js -> /target/orocommerce/public/js"
+                cp -rf /var/www/oro/public/js /target/orocommerce/public/
+                chown -R 82:82 /target/orocommerce/public/js
+              fi
+              
+              # Copier les bundles
+              if [ -d /var/www/oro/public/bundles ]; then
+                echo "Copying /var/www/oro/public/bundles -> /target/orocommerce/public/bundles"
+                cp -rf /var/www/oro/public/bundles /target/orocommerce/public/
+                chown -R 82:82 /target/orocommerce/public/bundles
+              fi
+              
+              # Vérifier les tailles des fichiers copiés
+              echo "=== Assets copiés avec succès ==="
+              ls -lah /target/orocommerce/public/build/default/css/ 2>/dev/null || echo "CSS folder not found"
+              ls -lah /target/orocommerce/public/build/default/js/ 2>/dev/null || echo "JS folder not found"
+              echo "=== Fin de la copie ==="
+              
+          volumeMounts:
+            - name: oro-app-data
+              mountPath: /target
+          securityContext:
+            runAsUser: 0
+      volumes:
+        - name: oro-app-data
+          persistentVolumeClaim:
+            claimName: oro-app-data
