@@ -23,9 +23,15 @@ spec:
               name: http
           env:
             - name: GF_SECURITY_ADMIN_USER
-              value: {{ .Values.env.GF_SECURITY_ADMIN_USER | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-secret
+                  key: GF_SECURITY_ADMIN_USER
             - name: GF_SECURITY_ADMIN_PASSWORD
-              value: {{ .Values.env.GF_SECURITY_ADMIN_PASSWORD | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-secret
+                  key: GF_SECURITY_ADMIN_PASSWORD
             - name: GF_USERS_ALLOW_SIGN_UP
               value: {{ .Values.env.GF_USERS_ALLOW_SIGN_UP | quote }}
             - name: GF_INSTALL_PLUGINS

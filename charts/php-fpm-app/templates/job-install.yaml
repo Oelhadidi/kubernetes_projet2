@@ -39,7 +39,10 @@ spec:
             - name: ORO_DB_USER
               value: {{ .Values.env.ORO_DB_USER | quote }}
             - name: ORO_DB_PASSWORD
-              value: {{ .Values.env.ORO_DB_PASSWORD | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: orocommerce-secret
+                  key: ORO_DB_PASSWORD
             - name: ORO_REDIS_DSN
               value: {{ .Values.env.ORO_REDIS_DSN | quote }}
             - name: ORO_ELASTICSEARCH_HOST

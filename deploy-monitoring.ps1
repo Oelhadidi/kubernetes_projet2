@@ -9,7 +9,8 @@ helm upgrade --install prometheus ./charts/prometheus
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Prometheus déployé avec succès" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "❌ Erreur lors du déploiement de Prometheus" -ForegroundColor Red
     exit 1
 }
@@ -24,7 +25,8 @@ helm upgrade --install grafana ./charts/grafana
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Grafana déployé avec succès" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "❌ Erreur lors du déploiement de Grafana" -ForegroundColor Red
     exit 1
 }
