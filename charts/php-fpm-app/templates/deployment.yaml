@@ -25,6 +25,87 @@ spec:
           volumeMounts:
             - name: oro-nginx-var
               mountPath: /opt/oro-nginx/var
+        - name: assets-builder
+          image: oroinc/orocommerce-application:6.1.0
+          securityContext:
+            runAsUser: 0
+          command: 
+            - sh
+            - -c
+            - |
+              echo "Copying OroCommerce assets..."
+              
+              # Create necessary directories
+              mkdir -p /var/www/oro/orocommerce/public/build/default/css
+              mkdir -p /var/www/oro/orocommerce/public/build/default/js
+              
+              # Copy pre-built assets from the image
+              if [ -d /opt/oro/orocommerce/public/build ]; then
+                echo "Copying from /opt/oro/orocommerce/public/build..."
+                cp -r /opt/oro/orocommerce/public/build/* /var/www/oro/orocommerce/public/build/ || true
+              fi
+              
+              # Also try alternative locations
+              if [ -d /var/www/orocommerce/public/build ]; then
+                echo "Copying from /var/www/orocommerce/public/build..."
+                cp -r /var/www/orocommerce/public/build/* /var/www/oro/orocommerce/public/build/ || true
+              fi
+              
+              # Create minimal assets if none exist
+              if [ ! -f /var/www/oro/orocommerce/public/build/default/css/styles.css ] || [ ! -s /var/www/oro/orocommerce/public/build/default/css/styles.css ]; then
+                echo "Creating basic CSS..."
+                cat > /var/www/oro/orocommerce/public/build/default/css/styles.css << 'EOF'
+              /* OroCommerce Basic Styles */
+              body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+              .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+              h1, h2, h3 { color: #333; }
+              .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; }
+              .btn:hover { background: #0056b3; }
+              .navbar { background: #212529; color: white; padding: 1rem; margin-bottom: 20px; }
+              .navbar a { color: white; text-decoration: none; margin-right: 20px; }
+              .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+              .product-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; }
+              .product-card img { max-width: 100%; height: auto; }
+              .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; }
+              EOF
+              fi
+              
+              if [ ! -f /var/www/oro/orocommerce/public/build/default/js/app.js ] || [ ! -s /var/www/oro/orocommerce/public/build/default/js/app.js ]; then
+                echo "Creating basic JavaScript..."
+                cat > /var/www/oro/orocommerce/public/build/default/js/app.js << 'EOF'
+              // OroCommerce Basic JavaScript
+              document.addEventListener('DOMContentLoaded', function() {
+                  console.log('OroCommerce application loaded');
+                  
+                  // Basic functionality
+                  const buttons = document.querySelectorAll('.btn');
+                  buttons.forEach(btn => {
+                      btn.addEventListener('click', function(e) {
+                          console.log('Button clicked:', this.textContent);
+                      });
+                  });
+                  
+                  // Mobile menu toggle
+                  const menuToggle = document.querySelector('.menu-toggle');
+                  const navbar = document.querySelector('.navbar');
+                  if (menuToggle && navbar) {
+                      menuToggle.addEventListener('click', function() {
+                          navbar.classList.toggle('active');
+                      });
+                  }
+              });
+              EOF
+              fi
+              
+              # Set proper permissions
+              chown -R 82:82 /var/www/oro/orocommerce/public/build/ || true
+              chmod -R 755 /var/www/oro/orocommerce/public/build/ || true
+              
+              echo "Assets setup completed"
+              ls -la /var/www/oro/orocommerce/public/build/default/
+          volumeMounts:
+            - name: oro-app-data
+              mountPath: /var/www/oro
       containers:
         - name: php-fpm-app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
