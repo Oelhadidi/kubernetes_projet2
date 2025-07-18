@@ -9,7 +9,8 @@ helm upgrade postgresql ./charts/postgresql
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ PostgreSQL mis à jour avec les secrets" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "❌ Erreur lors de la mise à jour de PostgreSQL" -ForegroundColor Red
     exit 1
 }
@@ -20,7 +21,8 @@ helm upgrade php-fpm-app ./charts/php-fpm-app
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ PHP-FPM mis à jour avec les secrets" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "❌ Erreur lors de la mise à jour de PHP-FPM" -ForegroundColor Red
     exit 1
 }
@@ -31,7 +33,8 @@ helm upgrade grafana ./charts/grafana
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "✅ Grafana mis à jour avec les secrets" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "❌ Erreur lors de la mise à jour de Grafana" -ForegroundColor Red
     exit 1
 }

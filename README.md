@@ -1,10 +1,39 @@
-# Run Oro Application Demo in Docker
+# Projet EII 5 - Migration OroCommerce vers Kubernetes
 
-## Prerequisites
+**Migration complète de l'application OroCommerce depuis Docker Compose vers Kubernetes avec Helm Charts**
 
-Install [Docker](https://docs.docker.com/engine/install/) with [Docker Compose](https://docs.docker.com/compose/install/).
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-1.25+-blue.svg)](https://kubernetes.io/)
+[![Helm](https://img.shields.io/badge/Helm-3.x-brightgreen.svg)](https://helm.sh/)
+[![OroCommerce](https://img.shields.io/badge/OroCommerce-6.1.0-orange.svg)](https://oroinc.com/)
 
-**Note:** The application uses port 80, so make sure that other services do not use it.
+## 🎯 Objectif du projet
+
+Migrer l'application **OroCommerce Demo** depuis Docker Compose vers Kubernetes en utilisant Helm Charts, avec monitoring intégré et sécurité renforcée.
+
+## 🏗️ Architecture déployée
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  KUBERNETES CLUSTER                     │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  📊 MONITORING         🌐 APPLICATION                   │
+│  ┌─────────────┐      ┌─────────────┐                  │
+│  │ Prometheus  │      │    Nginx    │                  │
+│  │   :9090     │      │    :80      │                  │
+│  └─────────────┘      └─────────────┘                  │
+│  ┌─────────────┐      ┌─────────────┐                  │
+│  │   Grafana   │      │  PHP-FPM    │                  │
+│  │   :3000     │      │   :9000     │                  │
+│  └─────────────┘      └─────────────┘                  │
+│                                                         │
+│  💾 DATA LAYER                                          │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐   │
+│  │ PostgreSQL  │ │    Redis    │ │  Elasticsearch  │   │
+│  │   :5432     │ │   :6379     │ │     :9200       │   │
+│  └─────────────┘ └─────────────┘ └─────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+```
 
 ## Run Application
 
