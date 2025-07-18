@@ -1,0 +1,20 @@
+image:
+  repository: docker.io/oroinc/pgsql
+  tag: "15.12-alpine" # adapte selon ${ORO_PG_VER} de ton .env
+  pullPolicy: IfNotPresent
+
+postgresql:
+  db: orodb         # adapte selon ${ORO_DB_NAME}
+  user: orodbuser     # adapte selon ${ORO_DB_USER}
+  password: orodbpass # adapte selon ${ORO_DB_PASSWORD}
+  rootPassword: orodbpass # adapte selon ${ORO_DB_ROOT_PASSWORD}
+
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi
+
+service:
+  type: ClusterIP
+  port: 5432

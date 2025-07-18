@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: oro-installer
+  labels:
+    app: oro-installer
+spec:
+  template:
+    metadata:
+      labels:
+        app: oro-installer
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-services
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              echo "Attente des services..."
+              until nc -z postgresql 5432; do echo "En attente de PostgreSQL..."; sleep 2; done
+              until nc -z redis 6379; do echo "En attente de Redis..."; sleep 2; done
+              until nc -z elasticsearch 9200; do echo "En attente d'Elasticsearch..."; sleep 2; done
+              echo "Tous les services sont prêts!"
+      containers:
+        - name: oro-installer
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: ["/bin/bash", "/scripts/install.sh"]
+          env:
+            - name: ORO_ENV
+              value: {{ .Values.env.ORO_ENV | quote }}
+            - name: ORO_DB_HOST
+              value: {{ .Values.env.ORO_DB_HOST | quote }}
+            - name: ORO_DB_PORT
+              value: {{ .Values.env.ORO_DB_PORT | quote }}
+            - name: ORO_DB_NAME
+              value: {{ .Values.env.ORO_DB_NAME | quote }}
+            - name: ORO_DB_USER
+              value: {{ .Values.env.ORO_DB_USER | quote }}
+            - name: ORO_DB_PASSWORD
+              value: {{ .Values.env.ORO_DB_PASSWORD | quote }}
+            - name: ORO_REDIS_DSN
+              value: {{ .Values.env.ORO_REDIS_DSN | quote }}
+            - name: ORO_ELASTICSEARCH_HOST
+              value: {{ .Values.env.ORO_ELASTICSEARCH_HOST | quote }}
+            - name: ORO_ELASTICSEARCH_PORT
+              value: {{ .Values.env.ORO_ELASTICSEARCH_PORT | quote }}
+          volumeMounts:
+            - name: oro-app-data
+              mountPath: /var/www/oro
+            - name: install-script
+              mountPath: /scripts
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+      volumes:
+        - name: oro-app-data
+          persistentVolumeClaim:
+            claimName: oro-app-data
+        - name: install-script
+          configMap:
+            name: oro-install-script
+            defaultMode: 0755

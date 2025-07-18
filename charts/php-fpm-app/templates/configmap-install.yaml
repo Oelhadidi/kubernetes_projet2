@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oro-install-script
+  labels:
+    app: oro-installer
+data:
+  install.sh: |
+    #!/bin/bash
+    set -e
+    
+    echo "=== Installation d'OroCommerce ==="
+    
+    # Les services sont déjà vérifiés par l'init container
+    echo "Services déjà vérifiés par l'init container"
+    
+    # Aller dans le répertoire de l'application
+    cd /var/www/oro
+    
+    # Vérifier si l'application est déjà installée
+    if [ -f app/config/parameters.yml ] || [ -f config/parameters.yml ]; then
+      echo "OroCommerce semble déjà installé."
+      exit 0
+    fi
+    
+    echo "Installation d'OroCommerce..."
+    
+    # Copier les fichiers de l'application si le volume est vide
+    if [ ! -f composer.json ]; then
+      echo "Copie des fichiers de l'application..."
+      cp -R /usr/src/orocommerce/* /var/www/oro/
+      chown -R www-data:www-data /var/www/oro
+    fi
+    
+    # Installation avec les paramètres de base
+    php bin/console oro:install \
+      --env=prod \
+      --timeout=0 \
+      --drop-database \
+      --user-name=admin \
+      --user-email=admin@example.com \
+      --user-firstname=Admin \
+      --user-lastname=User \
+      --user-password=admin123 \
+      --sample-data=y \
+      --organization-name="OroCommerce Demo" \
+      --application-url=http://orocommerce.local \
+      --force
+    
+    echo "=== Installation terminée ==="

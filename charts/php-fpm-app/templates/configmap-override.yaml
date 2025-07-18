@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: php-fpm-override
+  labels:
+    app: php-fpm-app
+data:
+  zz-override.conf: |
+    [www]
+    user = www-data
+    group = www-data

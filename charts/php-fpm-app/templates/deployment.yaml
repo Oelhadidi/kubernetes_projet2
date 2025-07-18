@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-fpm-app
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: php-fpm-app
+  template:
+    metadata:
+      labels:
+        app: php-fpm-app
+    spec:
+      initContainers:
+        - name: init-permissions
+          image: busybox
+          securityContext:
+            runAsUser: 0
+          command: ['sh', '-c', 'mkdir -p /opt/oro-nginx/var && chmod 777 /opt/oro-nginx/var']
+          volumeMounts:
+            - name: oro-nginx-var
+              mountPath: /opt/oro-nginx/var
+      containers:
+        - name: php-fpm-app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["php-fpm"]
+          ports:
+            - containerPort: 9000
+              name: php-fpm
+          env:
+            - name: ORO_ENV
+              value: {{ .Values.env.ORO_ENV | quote }}
+            - name: ORO_LOG_PATH
+              value: {{ .Values.env.ORO_LOG_PATH | quote }}
+            - name: ORO_DB_HOST
+              value: {{ .Values.env.ORO_DB_HOST | quote }}
+            - name: ORO_DB_PORT
+              value: {{ .Values.env.ORO_DB_PORT | quote }}
+            - name: ORO_DB_NAME
+              value: {{ .Values.env.ORO_DB_NAME | quote }}
+            - name: ORO_DB_USER
+              value: {{ .Values.env.ORO_DB_USER | quote }}
+            - name: ORO_DB_PASSWORD
+              value: {{ .Values.env.ORO_DB_PASSWORD | quote }}
+            - name: ORO_REDIS_DSN
+              value: {{ .Values.env.ORO_REDIS_DSN | quote }}
+            - name: ORO_ELASTICSEARCH_HOST
+              value: {{ .Values.env.ORO_ELASTICSEARCH_HOST | quote }}
+            - name: ORO_ELASTICSEARCH_PORT
+              value: {{ .Values.env.ORO_ELASTICSEARCH_PORT | quote }}
+            # Variables d'environnement spécifiques pour forcer la configuration
+            - name: ORO_DB_DSN
+              value: {{ .Values.env.ORO_DB_DSN | quote }}
+            - name: ORO_SEARCH_ENGINE_DSN
+              value: {{ .Values.env.ORO_SEARCH_ENGINE_DSN | quote }}
+            - name: ORO_MAILER_DSN
+              value: {{ .Values.env.ORO_MAILER_DSN | quote }}
+            - name: ORO_SECRET
+              value: {{ .Values.env.ORO_SECRET | quote }}
+            - name: APP_ENV
+              value: {{ .Values.env.APP_ENV | quote }}
+            - name: APP_DEBUG
+              value: {{ .Values.env.APP_DEBUG | quote }}
+          volumeMounts:
+            - name: oro-app-data
+              mountPath: /var/www/oro
+            - name: oro-nginx-var
+              mountPath: /opt/oro-nginx/var
+            - name: php-fpm-override
+              mountPath: /etc/php-fpm.d/zz-override.conf
+              subPath: zz-override.conf
+            - name: oro-config-override
+              mountPath: /var/www/oro/orocommerce/config/parameters.yml
+              subPath: parameters.yml
+            - name: oro-config-override
+              mountPath: /var/www/oro/orocommerce/.env
+              subPath: .env
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: oro-app-data
+          persistentVolumeClaim:
+            claimName: oro-app-data
+        - name: oro-nginx-var
+          emptyDir: {}
+        - name: php-fpm-override
+          configMap:
+            name: php-fpm-override
+        - name: oro-config-override
+          configMap:
+            name: oro-config-override
