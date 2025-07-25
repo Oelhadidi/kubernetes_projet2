@@ -138,9 +138,52 @@ exit;
 
 $indexRedirect | kubectl exec -i php-fpm-app-6df88f5df8-78drx -- tee /var/www/oro/orocommerce/public/index.php > $null
 
-# 4. Tests
+# 4. Configuration de l'accès
+Write-Host "`n🔧 Configuration de l'accès..."
+
+# Créer un ingress pour localhost
+$ingressManifest = @'
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-localhost
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx
+            port:
+              number: 80
+'@
+
+Write-Host "📝 Création de l'ingress..."
+$ingressManifest | kubectl apply -f - | Out-Null
+
+# Démarrer minikube tunnel en arrière-plan
+Write-Host "🚇 Démarrage du tunnel Minikube..."
+Start-Process pwsh -ArgumentList "-Command", "minikube tunnel" -WindowStyle Hidden
+
+# Attendre que le tunnel soit établi
+Write-Host "⏳ Attente de l'établissement du tunnel..."
+Start-Sleep 10
+
+# Port-forward en arrière-plan
+Write-Host "🔌 Configuration du port-forward..."
+Start-Process pwsh -ArgumentList "-Command", "kubectl port-forward svc/nginx 8080:80" -WindowStyle Hidden
+
+# Attendre que le port-forward soit prêt
+Write-Host "⏳ Attente de la disponibilité du service..."
+Start-Sleep 5
+
+# 5. Tests
 Write-Host "`n🧪 Tests de l'application..."
-Start-Sleep 3
 
 Write-Host "Test de l'application de démonstration:"
 try {
