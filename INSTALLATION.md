@@ -30,7 +30,7 @@ cd kubernetes_projet
 
 Le script fera automatiquement :
 - ✅ Vérification et démarrage de Minikube
-- ✅ Déploiement de l'infrastructure (PostgreSQL, Redis, Elasticsearch)
+- ✅ Déploiement de l'infrastructure (PostgreSQL)
 - ✅ Installation d'OroCommerce avec schéma complet
 - ✅ Chargement des 64 produits de démo
 - ✅ Configuration de la page d'accueil
@@ -54,9 +54,7 @@ kubectl get nodes
 
 ```powershell
 # Infrastructure de base
-helm upgrade --install redis ./charts/redis --wait
 helm upgrade --install postgresql ./charts/postgresql --wait
-helm upgrade --install elasticsearch ./charts/elasticsearch --wait
 
 # Application
 helm upgrade --install php-fpm-app ./charts/php-fpm-app --wait
@@ -173,8 +171,6 @@ En cas de problème, vérifiez :
 
 - OroCommerce: 6.1.0
 - PostgreSQL: 13
-- Redis: 7
-- Elasticsearch: 8.4
 - Nginx: 1.25
 - PHP: 8.4
 cd kubernetes_projet
@@ -184,12 +180,6 @@ cd kubernetes_projet
 ```bash
 # Déployer PostgreSQL
 helm install postgresql ./charts/postgresql
-
-# Déployer Redis
-helm install redis ./charts/redis
-
-# Déployer Elasticsearch
-helm install elasticsearch ./charts/elasticsearch
 
 # Déployer Nginx
 helm install nginx ./charts/nginx
@@ -266,6 +256,6 @@ helm upgrade <release-name> ./charts/<chart-name>
 
 ### Nettoyer complètement
 ```bash
-helm uninstall postgresql redis elasticsearch nginx php-fpm-app prometheus grafana
+helm uninstall postgresql nginx php-fpm-app prometheus grafana
 kubectl delete pvc --all
 ```

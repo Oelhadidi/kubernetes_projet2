@@ -20,8 +20,6 @@ spec:
             - |
               echo "Attente des services..."
               until nc -z postgresql 5432; do echo "En attente de PostgreSQL..."; sleep 2; done
-              until nc -z redis 6379; do echo "En attente de Redis..."; sleep 2; done
-              until nc -z elasticsearch 9200; do echo "En attente d'Elasticsearch..."; sleep 2; done
               echo "Tous les services sont prêts!"
       containers:
         - name: oro-installer
@@ -43,12 +41,6 @@ spec:
                 secretKeyRef:
                   name: orocommerce-secret
                   key: ORO_DB_PASSWORD
-            - name: ORO_REDIS_DSN
-              value: {{ .Values.env.ORO_REDIS_DSN | quote }}
-            - name: ORO_ELASTICSEARCH_HOST
-              value: {{ .Values.env.ORO_ELASTICSEARCH_HOST | quote }}
-            - name: ORO_ELASTICSEARCH_PORT
-              value: {{ .Values.env.ORO_ELASTICSEARCH_PORT | quote }}
           volumeMounts:
             - name: oro-app-data
               mountPath: /var/www/oro

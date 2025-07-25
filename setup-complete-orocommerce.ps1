@@ -35,9 +35,7 @@ Write-Host "✅ Nettoyage terminé" -ForegroundColor Green
 
 # 4. Déployer l'infrastructure
 Write-Host "🔧 Déploiement de l'infrastructure..." -ForegroundColor Yellow
-helm upgrade --install redis ./charts/redis --wait --timeout=10m
 helm upgrade --install postgresql ./charts/postgresql --wait --timeout=10m
-helm upgrade --install elasticsearch ./charts/elasticsearch --wait --timeout=10m
 Write-Host "✅ Infrastructure déployée" -ForegroundColor Green
 
 # 5. Déployer l'application principale

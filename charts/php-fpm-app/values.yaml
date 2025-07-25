@@ -124,12 +124,9 @@ env:
   ORO_DB_NAME: orodb
   ORO_DB_USER: orodbuser
   ORO_DB_PASSWORD: orodbpass
-  ORO_REDIS_DSN: redis://redis:6379
-  ORO_ELASTICSEARCH_HOST: elasticsearch
-  ORO_ELASTICSEARCH_PORT: 9200
   # Variables d'environnement critiques pour OroCommerce
   ORO_DB_DSN: postgresql://orodbuser:orodbpass@postgresql:5432/orodb?sslmode=disable
-  ORO_SEARCH_ENGINE_DSN: elastic_search://elasticsearch:9200
+  ORO_SEARCH_ENGINE_DSN: orm://
   ORO_MAILER_DSN: native://default
   ORO_SECRET: changeMe123SecretKeyForKubernetes2025
   APP_ENV: prod

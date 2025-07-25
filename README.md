@@ -11,7 +11,7 @@
 ```powershell
 # Cloner et installer
 git clone https://github.com/Oelhadidi/kubernetes_projet.git
-cd kubernetes_projet
+cd kubernetes_projet/docker-demo
 ./setup-complete-orocommerce.ps1
 ```
 
@@ -20,9 +20,10 @@ cd kubernetes_projet
 - **🛍️ 64 produits** avec images et descriptions complètes
 - **🏠 Page d'accueil** avec contenu RV professionnel  
 - **👨‍💼 Interface admin** (admin/admin)
-- **🔍 Recherche** et filtres fonctionnels
+- **🔍 Recherche** et filtres fonctionnels (ORM PostgreSQL)
 - **📊 Monitoring** Prometheus + Grafana
 - **🎨 Design** moderne avec tous les assets
+- **⚡ Architecture simplifiée** : PostgreSQL uniquement
 
 ## 🎯 URLs d'accès
 
@@ -34,7 +35,19 @@ Après installation et `kubectl port-forward service/nginx 8080:80` :
 - **Prometheus :** http://localhost:9090 (avec port-forward)
 - **Grafana :** http://localhost:3000 (avec port-forward)
 
-Migrer l'application **OroCommerce Demo** depuis Docker Compose vers Kubernetes en utilisant Helm Charts, avec monitoring intégré et sécurité renforcée.
+Migrer l'application **OroCommerce Demo** depuis Docker Compose vers Kubernetes en utilisant Helm Charts, avec monitoring intégré et architecture simplifiée (PostgreSQL uniquement).
+
+## 📁 Structure du projet
+
+```
+├── 📁 charts/              # Charts Helm (5 composants)
+├── 📁 archive/             # Scripts de migration
+├── 🚀 setup-complete-orocommerce.ps1    # Installation principale
+├── ✅ validate-simplified-deployment.ps1 # Validation
+└── 📚 Documentation complète
+```
+
+Voir [STRUCTURE.md](STRUCTURE.md) pour les détails complets.
 
 ## 🏗️ Architecture déployée
 
@@ -54,10 +67,10 @@ Migrer l'application **OroCommerce Demo** depuis Docker Compose vers Kubernetes 
 │  └─────────────┘      └─────────────┘                  │
 │                                                         │
 │  💾 DATA LAYER                                          │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐   │
-│  │ PostgreSQL  │ │    Redis    │ │  Elasticsearch  │   │
-│  │   :5432     │ │   :6379     │ │     :9200       │   │
-│  └─────────────┘ └─────────────┘ └─────────────────┘   │
+│  ┌─────────────┐                                       │
+│  │ PostgreSQL  │                                       │
+│  │   :5432     │                                       │
+│  └─────────────┘                                       │
 └─────────────────────────────────────────────────────────┘
 ```
 

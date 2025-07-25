@@ -24,20 +24,20 @@
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                   DATA LAYER                                │ │
 │  │                                                             │ │
-│  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │ │
-│  │ │ PostgreSQL  │ │    Redis    │ │      Elasticsearch      │ │ │
-│  │ │   :5432     │ │   :6379     │ │        :9200            │ │ │
-│  │ │ (Database)  │ │  (Cache)    │ │       (Search)          │ │ │
-│  │ └─────────────┘ └─────────────┘ └─────────────────────────┘ │ │
+│  │ ┌─────────────┐                                             │ │
+│  │ │ PostgreSQL  │                                             │ │
+│  │ │   :5432     │                                             │ │
+│  │ │ (Database)  │                                             │ │
+│  │ └─────────────┘                                             │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────────┐ │
 │  │                 STORAGE LAYER                               │ │
 │  │                                                             │ │
-│  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │ │
-│  │ │ PostgreSQL  │ │   Redis     │ │     Elasticsearch       │ │ │
-│  │ │    PVC      │ │    PVC      │ │        PVC              │ │ │
-│  │ │   20Gi      │ │   10Gi      │ │        30Gi             │ │ │
+│  │ ┌─────────────┐                                             │ │
+│  │ │ PostgreSQL  │                                             │ │
+│  │ │    PVC      │                                             │ │
+│  │ │   20Gi      │                                             │ │
 │  │ └─────────────┘ └─────────────┘ └─────────────────────────┘ │ │
 │  │                                                             │ │
 │  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │ │
@@ -80,20 +80,6 @@
 - **Stockage** : PVC 20Gi
 - **Sécurité** : Secrets pour les credentials
 
-#### Redis (Cache)
-- **Type** : StatefulSet + Service
-- **Réplicas** : 1
-- **Port** : 6379
-- **Fonction** : Cache en mémoire et sessions
-- **Stockage** : PVC 10Gi
-
-#### Elasticsearch (Moteur de recherche)
-- **Type** : StatefulSet + Service
-- **Réplicas** : 1
-- **Port** : 9200
-- **Fonction** : Indexation et recherche full-text
-- **Stockage** : PVC 30Gi
-
 ### Monitoring Layer
 
 #### Prometheus (Collecte de métriques)
@@ -127,10 +113,10 @@ PHP-FPM Service (:9000)
     ↓
 PHP-FPM Pod (OroCommerce)
     ↓
-┌─────────┬─────────┬─────────────┐
-│PostgreSQL│ Redis   │Elasticsearch│
-│ (:5432) │ (:6379) │  (:9200)    │
-└─────────┴─────────┴─────────────┘
+┌─────────┐
+│PostgreSQL│
+│ (:5432) │
+└─────────┘
 ```
 
 ## Sécurité
@@ -157,8 +143,6 @@ PHP-FPM Pod (OroCommerce)
 | Nginx | 100m | 500m | 128Mi | 256Mi |
 | PHP-FPM | 500m | 1000m | 1Gi | 2Gi |
 | PostgreSQL | 250m | 1000m | 256Mi | 1Gi |
-| Redis | 100m | 500m | 64Mi | 128Mi |
-| Elasticsearch | 500m | 2000m | 1Gi | 2Gi |
 | Prometheus | 200m | 500m | 512Mi | 1Gi |
 | Grafana | 200m | 500m | 256Mi | 512Mi |
 
@@ -167,12 +151,10 @@ PHP-FPM Pod (OroCommerce)
 | Volume | Taille | Type | Composant |
 |--------|--------|------|-----------|
 | postgresql-data | 20Gi | ReadWriteOnce | PostgreSQL |
-| redis-data | 10Gi | ReadWriteOnce | Redis |
-| elasticsearch-data | 30Gi | ReadWriteOnce | Elasticsearch |
 | oro-app-data | 50Gi | ReadWriteOnce | OroCommerce |
 | prometheus-data | 10Gi | ReadWriteOnce | Prometheus |
 | grafana-data | 5Gi | ReadWriteOnce | Grafana |
-| **Total** | **125Gi** | | |
+| **Total** | **85Gi** | | |
 
 ## Scalabilité
 
