@@ -11,40 +11,106 @@ data:
     
     echo "=== Installation d'OroCommerce ==="
     
-    # Les services sont déjà vérifiés par l'init container
-    echo "Services déjà vérifiés par l'init container"
+    # Répertoire de l'application
+    APP_DIR="/var/www/oro/orocommerce"
+    
+    echo "Vérification de l'application dans $APP_DIR"
+    
+    # Vérifier si l'application complète est déjà installée
+    if [ -f "$APP_DIR/bin/console" ] && [ -f "$APP_DIR/composer.json" ]; then
+      echo "OroCommerce est déjà installé."
+      cd "$APP_DIR"
+      
+      # Vérifier si l'installation est complète
+      if [ -f "config/parameters.yml" ] || [ -f ".env.local" ]; then
+        echo "Installation complète détectée. Mise à jour..."
+        php bin/console oro:platform:update --env=prod --force || true
+        exit 0
+      fi
+    fi
+    
+    echo "Application incomplète détectée. Installation de l'application complète..."
+    
+    # Utiliser les outils disponibles dans l'image
+    echo "Préparation de l'installation..."
+    
+    # Créer un répertoire temporaire pour le téléchargement
+    TEMP_DIR="/tmp/orocommerce-install"
+    mkdir -p "$TEMP_DIR"
+    cd "$TEMP_DIR"
+    
+    # Télécharger OroCommerce Application avec curl
+    echo "Téléchargement d'OroCommerce 6.1.0..."
+    curl -L -o orocommerce.tar.gz https://github.com/oroinc/orocommerce-application/archive/6.1.0.tar.gz
+    
+    # Extraire l'archive
+    echo "Extraction de l'application..."
+    tar -xzf orocommerce.tar.gz
+    
+    # Copier les fichiers de l'application vers le répertoire final
+    echo "Installation des fichiers de l'application..."
+    cp -r orocommerce-application-6.1.0/* "$APP_DIR/"
     
     # Aller dans le répertoire de l'application
-    cd /var/www/oro
+    cd "$APP_DIR"
     
-    # Vérifier si l'application est déjà installée
-    if [ -f app/config/parameters.yml ] || [ -f config/parameters.yml ]; then
-      echo "OroCommerce semble déjà installé."
-      exit 0
-    fi
+    # Configuration des permissions
+    echo "Configuration des permissions..."
+    chown -R www-data:www-data /var/www/oro
     
-    echo "Installation d'OroCommerce..."
+    # Créer les répertoires nécessaires
+    mkdir -p var/{sessions,cache,data,logs}
+    mkdir -p public/{media,js}
     
-    # Copier les fichiers de l'application si le volume est vide
-    if [ ! -f composer.json ]; then
-      echo "Copie des fichiers de l'application..."
-      cp -R /usr/src/orocommerce/* /var/www/oro/
-      chown -R www-data:www-data /var/www/oro
-    fi
+    # Installer les dépendances Composer
+    echo "Installation des dépendances Composer..."
+    composer install --no-dev --optimize-autoloader --no-interaction
     
-    # Installation avec les paramètres de base
+    # Installation d'OroCommerce
+    echo "Lancement de l'installation OroCommerce..."
     php bin/console oro:install \
       --env=prod \
-      --timeout=0 \
-      --drop-database \
+      --timeout=2000 \
       --user-name=admin \
       --user-email=admin@example.com \
       --user-firstname=Admin \
       --user-lastname=User \
-      --user-password=admin123 \
+      --user-password=admin \
       --sample-data=y \
       --organization-name="OroCommerce Demo" \
-      --application-url=http://orocommerce.local \
+      --application-url=http://localhost:8080 \
       --force
+    
+    # Configuration pour désactiver Redis et utiliser le cache de fichiers
+    echo "Configuration du cache de fichiers (désactivation de Redis)..."
+    
+    # Créer un fichier .env.local pour overrider la configuration Redis
+    echo "# Configuration pour désactiver Redis et utiliser le cache de fichiers" > .env.local
+    echo "REDIS_URL=" >> .env.local
+    echo "REDIS_CACHE_URL=" >> .env.local
+    echo "REDIS_DOCTRINE_URL=" >> .env.local
+    echo "REDIS_SESSION_URL=" >> .env.local
+    echo "" >> .env.local
+    echo "# Configuration du cache de fichiers" >> .env.local
+    echo "ORO_CACHE_DRIVER=filesystem" >> .env.local
+    echo "ORO_CACHE_NAMESPACE=oro_data" >> .env.local
+    
+    # Vider le cache pour prendre en compte la nouvelle configuration
+    echo "Nettoyage du cache..."
+    php bin/console cache:clear --env=prod --no-debug
+    
+    # Chargement des données de démo
+    echo "Chargement des données de démo..."
+    php bin/console oro:migration:data:load --fixtures-type=demo --env=prod
+    
+    # Configuration finale des permissions
+    echo "Configuration finale des permissions..."
+    chown -R www-data:www-data var/{sessions,cache,data,logs}
+    chown -R www-data:www-data public/{media,js}
+    chmod -R 775 var/{sessions,cache,data,logs}
+    chmod -R 775 public/{media,js}
+    
+    # Nettoyer le répertoire temporaire
+    rm -rf "$TEMP_DIR"
     
     echo "=== Installation terminée ==="
