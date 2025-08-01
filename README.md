@@ -24,8 +24,8 @@
 ### 2. Cloner le projet
 
 ```bash
-git clone <url-du-repo>
-cd <nom-du-repo>
+git clone https://github.com/Oelhadidi/kubernetes_projet2
+cd kubernetes_projet2
 ```
 
 
@@ -96,17 +96,8 @@ Puis ouvre [http://localhost:3000](http://localhost:3000)
 - **🎨 Design** moderne avec tous les assets
 - **⚡ Architecture simplifiée** : PostgreSQL uniquement
 
-## 📁 Structure du projet
 
-```
-├── charts/              # Charts Helm (tous composants)
-├── archive/             # Scripts de migration
-├── setup-complete-orocommerce.ps1    # Installation principale (legacy)
-├── validate-simplified-deployment.ps1 # Validation
-└── Documentation complète
-```
 
-Voir [STRUCTURE.md](STRUCTURE.md) pour les détails complets.
 
 ## 🏗️ Architecture déployée
 
