@@ -1,4 +1,8 @@
-
+# Collaborateurs :
+    BRAHIM BOUTAGJAT
+    DRILON LIMANI
+    GETOAR LIMANI
+    OMAR ELHADIDI
 # 🛒 OroCommerce sur Kubernetes avec Données de Démo Complètes
 
 **Déploiement complet d'OroCommerce avec 64 produits, interface admin et monitoring intégré.**
@@ -24,6 +28,12 @@ git clone <url-du-repo>
 cd <nom-du-repo>
 ```
 
+
+### lancement de minikube 
+ ```bash
+minikube start
+```   
+
 ### 3. Déployer la base de données PostgreSQL
 
 ```bash
@@ -33,7 +43,7 @@ helm install postgresql ./charts/postgresql
 ### 4. Déployer Redis
 
 ```bash
-helm install redis ./charts/redis
+kubectl apply -f redis-deployment.yaml
 ```
 
 ### 5. Déployer le backend PHP-FPM (OroCommerce)
@@ -100,28 +110,35 @@ Voir [STRUCTURE.md](STRUCTURE.md) pour les détails complets.
 
 ## 🏗️ Architecture déployée
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  KUBERNETES CLUSTER                     │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  📊 MONITORING         🌐 APPLICATION                   │
-│  ┌─────────────┐      ┌─────────────┐                  │
-│  │ Prometheus  │      │    Nginx    │                  │
-│  │   :9090     │      │    :80      │                  │
-│  └─────────────┘      └─────────────┘                  │
-│  ┌─────────────┐      ┌─────────────┐                  │
-│  │   Grafana   │      │  PHP-FPM    │                  │
-│  │   :3000     │      │   :9000     │                  │
-│  └─────────────┘      └─────────────┘                  │
-│                                                         │
-│  💾 DATA LAYER                                          │
-│  ┌─────────────┐                                       │
-│  │ PostgreSQL  │                                       │
-│  │   :5432     │                                       │
-│  └─────────────┘                                       │
-└─────────────────────────────────────────────────────────┘
-```
+Cette stack Kubernetes déploie une application OroCommerce complète avec monitoring intégré :
+
+### 🌐 Couche Frontend
+- **Nginx** (port 80) : Serveur web et reverse proxy
+  - Point d'entrée de l'application
+  - Gestion des fichiers statiques
+  - Redirection vers PHP-FPM pour le traitement dynamique
+
+### ⚙️ Couche Application
+- **PHP-FPM** (port 9000) : Moteur d'exécution OroCommerce
+  - Application e-commerce complète
+  - Version 6.1.0 pré-configurée
+  - Traitement des requêtes métier
+
+### 💾 Couche Données
+- **PostgreSQL** (port 5432) : Base de données principale
+  - Stockage des données OroCommerce
+  - Version 15.12 optimisée
+  - Persistance garantie avec PVC
+
+### 📊 Couche Monitoring
+- **Prometheus** (port 9090) : Collecte de métriques
+  - Surveillance en temps réel
+  - Métriques Kubernetes et applicatives
+  
+- **Grafana** (port 3000) : Dashboards de visualisation
+  - Interface de monitoring
+  - Dashboards pré-configurés
+  - Alerting intégré
 
 
 

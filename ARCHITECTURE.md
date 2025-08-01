@@ -2,52 +2,61 @@
 
 ## Vue d'ensemble de l'architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        KUBERNETES CLUSTER                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌─────────────────┐    ┌─────────────────┐                    │
-│  │   MONITORING    │    │   APPLICATION   │                    │
-│  │                 │    │                 │                    │
-│  │ ┌─────────────┐ │    │ ┌─────────────┐ │                    │
-│  │ │ Prometheus  │ │    │ │    Nginx    │ │                    │
-│  │ │   :9090     │ │    │ │    :80      │ │                    │
-│  │ └─────────────┘ │    │ └─────────────┘ │                    │
-│  │                 │    │        │        │                    │
-│  │ ┌─────────────┐ │    │ ┌─────────────┐ │                    │
-│  │ │   Grafana   │ │    │ │  PHP-FPM    │ │                    │
-│  │ │   :3000     │ │    │ │   :9000     │ │                    │
-│  │ └─────────────┘ │    │ └─────────────┘ │                    │
-│  └─────────────────┘    └─────────────────┘                    │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                   DATA LAYER                                │ │
-│  │                                                             │ │
-│  │ ┌─────────────┐                                             │ │
-│  │ │ PostgreSQL  │                                             │ │
-│  │ │   :5432     │                                             │ │
-│  │ │ (Database)  │                                             │ │
-│  │ └─────────────┘                                             │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────────────┐ │
-│  │                 STORAGE LAYER                               │ │
-│  │                                                             │ │
-│  │ ┌─────────────┐                                             │ │
-│  │ │ PostgreSQL  │                                             │ │
-│  │ │    PVC      │                                             │ │
-│  │ │   20Gi      │                                             │ │
-│  │ └─────────────┘ └─────────────┘ └─────────────────────────┘ │ │
-│  │                                                             │ │
-│  │ ┌─────────────┐ ┌─────────────┐ ┌─────────────────────────┐ │ │
-│  │ │ OroCommerce │ │ Prometheus  │ │       Grafana           │ │ │
-│  │ │ App Data    │ │   Data      │ │        Data             │ │ │
-│  │ │   50Gi      │ │   10Gi      │ │        5Gi              │ │ │
-│  │ └─────────────┘ └─────────────┘ └─────────────────────────┘ │ │
-│  └─────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-```
+KUBERNETES CLUSTER:
+    Monitoring Layer:
+        - Prometheus :9090
+        - Grafana :3000
+    Application Layer:
+        - Nginx (Reverse Proxy) :80
+        - PHP-FPM (OroCommerce) :9000
+    Data Layer:
+        - PostgreSQL (Database) :5432
+    Storage Layer:
+        - Persistent Volumes for PostgreSQL :20Gi
+        - OroCommerce data :50Gi
+        - Prometheus data :10Gi
+        - Grafana data :5Gi
+
+Cette architecture Kubernetes déploie une stack complète OroCommerce avec monitoring intégré, organisée en plusieurs couches fonctionnelles :
+
+### 🌐 Couche Application (Frontend)
+- **Nginx** : Serveur web reverse proxy sur le port 80
+  - Sert les fichiers statiques et redirige les requêtes PHP vers PHP-FPM
+  - Configuration optimisée pour OroCommerce
+  - Point d'entrée principal de l'application
+
+### ⚙️ Couche Traitement (Backend)
+- **PHP-FPM** : Moteur d'exécution PHP sur le port 9000
+  - Exécute l'application OroCommerce 6.1.0
+  - Traite toutes les requêtes dynamiques PHP
+  - Connecté à PostgreSQL pour la persistance des données
+
+### 🗄️ Couche Données
+- **PostgreSQL** : Base de données relationnelle sur le port 5432
+  - Base de données principale d'OroCommerce
+  - Stockage des données métier, configuration, et cache
+  - Version 15.12 optimisée pour les workloads OroCommerce
+
+### 📊 Couche Monitoring
+- **Prometheus** : Collecteur de métriques sur le port 9090
+  - Surveillance des performances de tous les composants
+  - Collecte automatique des métriques Kubernetes et applicatives
+  - Retention des données de monitoring
+
+- **Grafana** : Interface de visualisation sur le port 3000
+  - Dashboards pré-configurés pour OroCommerce
+  - Alerting et notifications
+  - Source de données Prometheus intégrée
+
+### 💾 Couche Stockage Persistant
+- **PVC PostgreSQL** : 8Gi pour les données de la base
+- **PVC OroCommerce** : 2Gi pour les fichiers applicatifs et assets
+- **PVC Prometheus** : 10Gi pour les métriques historiques
+- **PVC Grafana** : Stockage des dashboards et configurations
+
+### 🔧 Jobs et Tâches
+- **oro-installer** : Job d'installation initiale d'OroCommerce
+- **oro-copy-assets** : Job de copie des assets statiques optimisés
 
 ## Composants détaillés
 
